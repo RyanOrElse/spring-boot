@@ -86,6 +86,10 @@ public abstract class AutoConfigurationPackages {
 	 * you don't call this method directly, but instead rely on the default convention
 	 * where the package name is set from your {@code @EnableAutoConfiguration}
 	 * configuration class or classes.
+	 *
+	 * 它要判断当前IOC容器中是否包含 AutoConfigurationPackages 。如果有，就会拿到刚才传入的包名，
+	 * 设置到一个 basePackage 里面！basePackage 的意义很明显是根包。换句话说，它要取主启动类所在包及子包下的组件。
+	 * 到这里，就呼应了文档注释中的描述，也解释了为什么 SpringBoot 的启动器一定要在所有类的最外层。
 	 * @param registry the bean definition registry
 	 * @param packageNames the package names to set
 	 */

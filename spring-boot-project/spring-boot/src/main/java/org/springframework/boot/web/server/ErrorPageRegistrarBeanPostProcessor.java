@@ -30,6 +30,8 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 
 /**
+ * Bean的后置处理器，它将Bean工厂中的所有 ErrorPageRegistrars 应用于 ErrorPageRegistry 类型的Bean。
+ * 可推测出它的作用是将所有设置的错误页跳转规则注册到错误处理器中
  * {@link BeanPostProcessor} that applies all {@link ErrorPageRegistrar}s from the bean
  * factory to {@link ErrorPageRegistry} beans.
  *

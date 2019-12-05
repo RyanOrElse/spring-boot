@@ -51,6 +51,7 @@ import org.springframework.util.ObjectUtils;
  * @author Stephane Nicoll
  */
 @Configuration(proxyBeanMethods = false)
+//在自动配置中具有最高优先级执行
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @ConditionalOnClass(ServletRequest.class)
 @ConditionalOnWebApplication(type = Type.SERVLET)
@@ -96,6 +97,9 @@ public class ServletWebServerFactoryAutoConfiguration {
 			if (this.beanFactory == null) {
 				return;
 			}
+			// 编程式注入组件
+			// 它实现了 ImportBeanDefinitionRegistrar 接口，在registerBeanDefinitions中可以编程式向IOC容器中注入组件。
+			// 它注册的两个组件是：WebServerFactoryCustomizerBeanPostProcessor、ErrorPageRegistrarBeanPostProcessor
 			registerSyntheticBeanIfMissing(registry,
 					"webServerFactoryCustomizerBeanPostProcessor",
 					WebServerFactoryCustomizerBeanPostProcessor.class);

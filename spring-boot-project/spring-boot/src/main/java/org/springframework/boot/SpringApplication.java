@@ -269,11 +269,17 @@ public class SpringApplication {
 	public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
 		this.resourceLoader = resourceLoader;
 		Assert.notNull(primarySources, "PrimarySources must not be null");
+		// 将传入的DemoApplication启动类放入primarySources中，这样应用就知道主启动类在哪里，叫什么了
+		// SpringBoot一般称呼这种主启动类叫primarySource（主配置资源来源）
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+		// 判断当前应用环境
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
+		// 设置初始化器 用于在刷新容器之前初始化Spring ConfigurableApplicationContext 的回调接口
 		setInitializers((Collection) getSpringFactoriesInstances(
 				ApplicationContextInitializer.class));
+		// 设置监听器
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+		// 确定主配置类
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
 

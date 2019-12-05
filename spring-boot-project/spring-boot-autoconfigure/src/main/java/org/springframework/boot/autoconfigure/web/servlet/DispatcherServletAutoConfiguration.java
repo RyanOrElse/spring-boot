@@ -52,6 +52,9 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
+ *
+ * DispatcherServlet 的自动配置。它起作用应该依赖于一个已经存在嵌入式Web服务器的独立应用程序，
+ * 也适用于使用 SpringBootServletInitializer 的可部署应用程序。
  * {@link EnableAutoConfiguration Auto-configuration} for the Spring
  * {@link DispatcherServlet}. Should work for a standalone application where an embedded
  * web server is already present and also for a deployable application using
@@ -62,8 +65,10 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Stephane Nicoll
  * @author Brian Clozel
  */
+// 最高配置优先级
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @Configuration(proxyBeanMethods = false)
+// Servlet环境下才生效
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @ConditionalOnClass(DispatcherServlet.class)
 @AutoConfigureAfter(ServletWebServerFactoryAutoConfiguration.class)
@@ -79,12 +84,14 @@ public class DispatcherServletAutoConfiguration {
 	 */
 	public static final String DEFAULT_DISPATCHER_SERVLET_REGISTRATION_BEAN_NAME = "dispatcherServletRegistration";
 
+	//  注册DispatcherServlet的配置类
 	@Configuration(proxyBeanMethods = false)
 	@Conditional(DefaultDispatcherServletCondition.class)
 	@ConditionalOnClass(ServletRegistration.class)
 	@EnableConfigurationProperties({ HttpProperties.class, WebMvcProperties.class })
 	protected static class DispatcherServletConfiguration {
 
+		// 构造DispatcherServlet
 		@Bean(name = DEFAULT_DISPATCHER_SERVLET_BEAN_NAME)
 		public DispatcherServlet dispatcherServlet(HttpProperties httpProperties,
 				WebMvcProperties webMvcProperties) {
@@ -100,6 +107,7 @@ public class DispatcherServletAutoConfiguration {
 			return dispatcherServlet;
 		}
 
+		// 注册文件上传组件
 		@Bean
 		@ConditionalOnBean(MultipartResolver.class)
 		@ConditionalOnMissingBean(name = DispatcherServlet.MULTIPART_RESOLVER_BEAN_NAME)

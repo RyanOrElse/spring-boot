@@ -58,6 +58,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ *
+ * DeferredImportSelector 的执行时机，是在 @Configuration 注解中的其他逻辑被处理完毕之后
+ * （包括对 @ImportResource、@Bean 这些注解的处理）再执行，换句话说，DeferredImportSelector 的执行时机比 ImportSelector 更晚。
  * {@link DeferredImportSelector} to handle {@link EnableAutoConfiguration
  * auto-configuration}. This class can also be subclassed if a custom variant of
  * {@link EnableAutoConfiguration @EnableAutoConfiguration} is needed.
@@ -97,6 +100,7 @@ public class AutoConfigurationImportSelector
 		}
 		AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader
 				.loadMetadata(this.beanClassLoader);
+		// 加载自动配置类
 		AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(
 				autoConfigurationMetadata, annotationMetadata);
 		return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
@@ -116,6 +120,8 @@ public class AutoConfigurationImportSelector
 			return EMPTY_ENTRY;
 		}
 		AnnotationAttributes attributes = getAttributes(annotationMetadata);
+		// 这个方法里有一个非常关键的集合：configurations（最后直接拿他来返回出去了，给 selectImports 方法转成 String[]）。
+		// 既然最后拿它返回出去，必然它是导入其他组件的核心。
 		List<String> configurations = getCandidateConfigurations(annotationMetadata,
 				attributes);
 		configurations = removeDuplicates(configurations);
@@ -178,6 +184,9 @@ public class AutoConfigurationImportSelector
 	 */
 	protected List<String> getCandidateConfigurations(AnnotationMetadata metadata,
 			AnnotationAttributes attributes) {
+		// SPI机制加载自动配置类
+		// 获取当前 classpath 下所有jar包中有的 spring.factories 文件，并将它们加载到内存中。
+		// 它拿到每一个文件，并用 Properties 方式加载文件，之后把这个文件中每一组键值对都加载出来，放入 MultiValueMap 中。
 		List<String> configurations = SpringFactoriesLoader.loadFactoryNames(
 				getSpringFactoriesLoaderFactoryClass(), getBeanClassLoader());
 		Assert.notEmpty(configurations,

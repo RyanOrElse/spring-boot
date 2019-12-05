@@ -126,6 +126,9 @@ import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
+ * 在配置中标注了，WebMvcAutoConfiguration 必须在 DispatcherServletAutoConfiguration、
+ * TaskExecutionAutoConfiguration、ValidationAutoConfiguration 执行完后再执行。
+ *
  * {@link EnableAutoConfiguration Auto-configuration} for {@link EnableWebMvc Web MVC}.
  *
  * @author Phillip Webb
@@ -255,6 +258,7 @@ public class WebMvcAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
+		// 最常用的 ViewResolver，通过设置前后缀来匹配视图
 		public InternalResourceViewResolver defaultViewResolver() {
 			InternalResourceViewResolver resolver = new InternalResourceViewResolver();
 			resolver.setPrefix(this.mvcProperties.getView().getPrefix());
@@ -265,6 +269,7 @@ public class WebMvcAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(View.class)
 		@ConditionalOnMissingBean
+		// 如果 Controller 中返回的视图名称恰好有一个Bean的名称与之相同，则会交予Bean处理
 		public BeanNameViewResolver beanNameViewResolver() {
 			BeanNameViewResolver resolver = new BeanNameViewResolver();
 			resolver.setOrder(Ordered.LOWEST_PRECEDENCE - 10);
@@ -275,6 +280,7 @@ public class WebMvcAutoConfiguration {
 		@ConditionalOnBean(ViewResolver.class)
 		@ConditionalOnMissingBean(name = "viewResolver",
 				value = ContentNegotiatingViewResolver.class)
+		// 最高级的 ViewResolver，负责将视图解析的工作代理给不同的 ViewResolver 来处理不同的View
 		public ContentNegotiatingViewResolver viewResolver(BeanFactory beanFactory) {
 			ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
 			resolver.setContentNegotiationManager(
@@ -332,6 +338,8 @@ public class WebMvcAutoConfiguration {
 				logger.debug("Default resource handling disabled");
 				return;
 			}
+			// 注册静态资源路径。可以看到，它将 /webjars 路径下的资源都映射到 classpath:/META-INF/resources/webjars 中。
+			// webjars 可以将前端的框架变成Maven依赖，减少手动加入静态资源的工作。
 			Duration cachePeriod = this.resourceProperties.getCache().getPeriod();
 			CacheControl cacheControl = this.resourceProperties.getCache()
 					.getCachecontrol().toHttpCacheControl();
@@ -342,6 +350,7 @@ public class WebMvcAutoConfiguration {
 						.setCachePeriod(getSeconds(cachePeriod))
 						.setCacheControl(cacheControl));
 			}
+			// 映射静态资源路径
 			String staticPathPattern = this.mvcProperties.getStaticPathPattern();
 			if (!registry.hasMappingForPattern(staticPathPattern)) {
 				customizeResourceHandlerRegistration(
@@ -530,6 +539,7 @@ public class WebMvcAutoConfiguration {
 
 		@Bean
 		@Override
+		// 注册了 Hibernate-Validator 参数校验器
 		public Validator mvcValidator() {
 			if (!ClassUtils.isPresent("javax.validation.Validator",
 					getClass().getClassLoader())) {

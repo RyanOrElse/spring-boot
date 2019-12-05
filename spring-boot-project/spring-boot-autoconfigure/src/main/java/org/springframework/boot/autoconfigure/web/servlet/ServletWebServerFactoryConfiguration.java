@@ -58,6 +58,7 @@ import org.springframework.context.annotation.Configuration;
 class ServletWebServerFactoryConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
+	// 默认导入的 spring-boot-starter-web 中导入的是 Tomcat 的依赖
 	@ConditionalOnClass({ Servlet.class, Tomcat.class, UpgradeProtocol.class })
 	@ConditionalOnMissingBean(value = ServletWebServerFactory.class,
 			search = SearchStrategy.CURRENT)
